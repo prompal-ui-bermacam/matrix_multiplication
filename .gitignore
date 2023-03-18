@@ -4,3 +4,4 @@ bin/thread
 bin/thread2
 bin/mpi
 data/*txt
+time*

@@ -3,6 +3,7 @@
 #include <mpi.h>
 #include <string.h>
 #include "matrix.h"
+#include <sys/time.h>
 
 double *mat_2D_to_1D(matrix_struct *m) {
     double *matrix = malloc( (m->rows * m->cols) * sizeof(double) );
@@ -10,6 +11,13 @@ double *mat_2D_to_1D(matrix_struct *m) {
         memcpy( matrix + (i * m->cols), m->mat_data[i], m->cols * sizeof(double) );
     }
     return matrix;
+}
+
+long long getmicrosec() {
+    struct timeval tv;
+    gettimeofday(&tv, NULL);
+    long long timestamp = (long long) tv.tv_sec * 1000000 + tv.tv_usec;
+    return timestamp;
 }
 
 int main(int argc, char *argv[]) {
@@ -30,7 +38,11 @@ int main(int argc, char *argv[]) {
     MPI_Init(&argc, &argv);
     MPI_Comm_size(MPI_COMM_WORLD, &num_worker);
     MPI_Comm_rank(MPI_COMM_WORLD, &rank);
-    
+
+    char filename[15];
+    sprintf(filename, "time_%d.txt", rank);
+    FILE * fp = fopen(filename, "a+");
+
     /** the master initializes the data **/
     if (rank == 0) {
         
@@ -85,10 +97,14 @@ int main(int argc, char *argv[]) {
         m_b = malloc( size_b * sizeof(double) );
     }
 
+    fprintf(fp, "[S] %d %d %lld\n", size_a, size_b, getmicrosec());
+
     // send 1D matrices to workers
     MPI_Bcast(m_a, size_a , MPI_DOUBLE, 0, MPI_COMM_WORLD);
     MPI_Bcast(m_b, size_b , MPI_DOUBLE, 0, MPI_COMM_WORLD);
     
+    fprintf(fp, "[F] %d %d %lld\n", size_a, size_b, getmicrosec());
+
     // calculate the start- and endrow for worker  
     int startrow = rank * ( matrix_properties[0] / num_worker);
     int endrow = ((rank + 1) * ( matrix_properties[0] / num_worker)) -1;
@@ -132,7 +148,8 @@ int main(int argc, char *argv[]) {
     
     free(result_matrix);
     free(final_matrix);
-    
+    fclose(fp);
+
     MPI_Finalize();
     exit(EXIT_SUCCESS);
 }
