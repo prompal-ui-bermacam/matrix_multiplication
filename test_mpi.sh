@@ -16,9 +16,9 @@ NPS=(
 MATRIX_SIZES=(
     128
     256
-    # 512
-    # 1024
-    # 2048
+    512
+    1024
+    2048
 )
 
 for SZ in ${MATRIX_SIZES[@]}
