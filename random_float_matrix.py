@@ -9,16 +9,17 @@
 #   ./gen_matrices.py 4 4
 #
 # Author: Philipp Böhm
+# Update 1: Muhammad Faishol A M - Change to integer only
 
 import sys
 import random
 
 try:
     dim_x, dim_y = int(sys.argv[1]), int(sys.argv[2])
-except Exception, e:
+except Exception:
     sys.stderr.write("error parsing matrix dimensions ...\n")
     raise
 
 
-for row in xrange(0, dim_x):
-    print "\t".join([ unicode(random.uniform(0, 9999)) for x in xrange(0, dim_y) ])
+for row in range(0, dim_x):
+    print("\t".join([ str(random.randint(-100, 100)) for x in range(0, dim_y) ]))
